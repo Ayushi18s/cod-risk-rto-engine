@@ -1,0 +1,25 @@
+{
+  "rows": 2018,
+  "columns": 17,
+  "unique_order_ids": 1988,
+  "duplicate_order_ids": 30,
+  "missing_by_column": {
+    "order_id": 0,
+    "order_datetime": 0,
+    "customer_name": 0,
+    "phone": 0,
+    "address": 0,
+    "city": 4,
+    "state": 0,
+    "pincode": 12,
+    "order_value": 0,
+    "items": 0,
+    "num_items": 0,
+    "customer_prior_orders": 0,
+    "customer_prior_rto": 0,
+    "utm_source": 0,
+    "courier": 0,
+    "payment_method": 0,
+    "final_status": 0
+  }
+}

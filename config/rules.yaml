@@ -1,0 +1,18 @@
+# Editable business rules. Tune after backtesting.
+risk_thresholds:
+  low: 0.25
+  high: 0.55
+actions:
+  high_risk: "WHATSAPP_CONFIRM"
+  medium_risk: "PREPAID_NUDGE"
+  low_risk: "SHIP_AS_IS"
+prepaid:
+  discount_rupees: 20
+  cod_rto_rate: 0.28
+  prepaid_rto_rate: 0.04
+economics:
+  forward_shipping: 65
+  return_shipping: 65
+  packaging_handling: 25
+  damaged_rate: 0.08
+  product_cost: 180
