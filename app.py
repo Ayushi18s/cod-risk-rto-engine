@@ -29,7 +29,7 @@ with st.sidebar:
     low = st.slider("Medium-risk threshold", 0.05, 0.70, float(rules["risk_thresholds"]["low"]), 0.05)
     high = st.slider("High-risk threshold", 0.20, 0.95, float(rules["risk_thresholds"]["high"]), 0.05)
     discount = st.number_input("Prepaid discount (₹)", 0, 100, int(rules["prepaid"]["discount_rupees"]), 5)
-    st.caption("Thresholds are editable for scenario testing. Persist changes in config/rules.yaml.")
+    st.caption("Scenario-only controls. To persist new defaults, edit config/rules.yaml.")
 
 scored["recommended_action"] = scored.apply(lambda r: assign_action(r, low, high), axis=1)
 yesterday = pd.Timestamp.today().normalize() - pd.Timedelta(days=1)
@@ -60,11 +60,11 @@ left,right = st.columns(2)
 with left:
     st.subheader("Historical delivery outcomes")
     outcomes = df["final_status"].value_counts().rename_axis("status").reset_index(name="orders")
-    st.plotly_chart(px.pie(outcomes, names="status", values="orders", hole=0.45), use_container_width=True)
+    st.plotly_chart(px.pie(outcomes, names="status", values="orders", hole=0.45), width="stretch")
 with right:
     st.subheader("Recommended action mix")
     action_counts = scored["recommended_action"].value_counts().rename_axis("action").reset_index(name="orders")
-    st.plotly_chart(px.bar(action_counts, x="action", y="orders", color="action"), use_container_width=True)
+    st.plotly_chart(px.bar(action_counts, x="action", y="orders", color="action"), width="stretch")
 
 st.subheader("Risk and decision explorer")
 filters = st.multiselect("Filter action", sorted(scored["recommended_action"].unique()),
@@ -83,7 +83,7 @@ view["ops_reason"] = view.apply(
 )
 cols = ["order_id","customer_name","city","order_value","customer_prior_orders","customer_prior_rto",
         "risk_score","recommended_action","ops_reason","final_status"]
-st.dataframe(view[cols].sort_values("risk_score", ascending=False), use_container_width=True, hide_index=True)
+st.dataframe(view[cols].sort_values("risk_score", ascending=False), width="stretch", hide_index=True)
 st.download_button("Download scored decision log", view[cols].to_csv(index=False).encode("utf-8"),
                    "decision_log.csv", "text/csv")
 
