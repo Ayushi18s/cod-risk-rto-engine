@@ -86,11 +86,24 @@ def add_risk_scores(df, model):
     return out
 
 def assign_action(row, low=0.25, high=0.55):
-    # Never auto-cancel based only on a model score.
-    if row["risk_score"] >= high or row["address_short"] or not row["pincode_valid"] or row["name_suspicious"]:
+    severe_data_issue = (
+        not bool(row["pincode_valid"]) or
+        (bool(row["name_suspicious"]) and bool(row["address_short"]))
+    )
+
+    if severe_data_issue:
+        return "HOLD_REVIEW"
+
+    if (
+        row["risk_score"] >= high
+        or bool(row["name_suspicious"])
+        or bool(row["address_short"])
+    ):
         return "WHATSAPP_CONFIRM"
+
     if row["risk_score"] >= low:
         return "PREPAID_NUDGE"
+
     return "SHIP_AS_IS"
 
 def expected_rto_cost(cfg):

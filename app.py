@@ -70,11 +70,17 @@ st.subheader("Risk and decision explorer")
 filters = st.multiselect("Filter action", sorted(scored["recommended_action"].unique()),
                          default=sorted(scored["recommended_action"].unique()))
 view = scored[scored["recommended_action"].isin(filters)].copy()
-view["ops_reason"] = view.apply(lambda r:
-    "Address/pincode/name needs manual confirmation" if r["address_short"] or not r["pincode_valid"] or r["name_suspicious"]
-    else "Elevated model risk; confirm before dispatch" if r["risk_score"] >= high
-    else "Moderate model risk; offer prepaid option" if r["risk_score"] >= low
-    else "Low observed risk; proceed with normal dispatch", axis=1)
+view["ops_reason"] = view.apply(
+    lambda r:
+        "Hold for manual address/data review"
+        if r["recommended_action"] == "HOLD_REVIEW"
+        else "WhatsApp confirmation required"
+        if r["recommended_action"] == "WHATSAPP_CONFIRM"
+        else "Offer prepaid conversion discount"
+        if r["recommended_action"] == "PREPAID_NUDGE"
+        else "Low risk - proceed with dispatch",
+    axis=1
+)
 cols = ["order_id","customer_name","city","order_value","customer_prior_orders","customer_prior_rto",
         "risk_score","recommended_action","ops_reason","final_status"]
 st.dataframe(view[cols].sort_values("risk_score", ascending=False), use_container_width=True, hide_index=True)
