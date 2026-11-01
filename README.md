@@ -1,41 +1,95 @@
 # COD Risk & RTO Control Tower
 
-A Streamlit decision-support prototype for pre-shipment COD risk management.
+A Streamlit-based decision-support prototype for pre-shipment Cash on Delivery (COD) risk management. It analyzes historical order data, estimates RTO risk, and recommends operational actions to reduce avoidable returns.
 
 ## Run locally (under 10 minutes)
 
-1. Install Python 3.10+.
-2. Open this folder in VS Code.
-3. Open the VS Code terminal and run:
+**Requirements:** Python 3.10+
 
 ```bash
+# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Start dashboard
 streamlit run app.py
 ```
 
-On Windows, activate with `.venv\\Scripts\\activate`.
+On Windows, activate the environment using:
 
-## What it includes
-- CSV loading, status normalization and duplicate order-ID removal.
-- Baseline Random Forest RTO model with a held-out test split.
-- Editable risk thresholds and business rules in `config/rules.yaml`.
-- Four-way action recommendation: ship as-is, WhatsApp confirmation, prepaid nudge, or manual review (manual review is represented through the confirmation path).
-- WhatsApp message and response simulator (YES / NO / unclear / no reply).
-- Dashboard, estimated prepaid economics and downloadable decision log.
+```bash
+.venv\Scripts\activate
+```
 
-## Important limitations
-- The sample is historical and relatively small. Model metrics are diagnostic, not proof of causal impact.
-- Model scores must not trigger automatic cancellation. Human review is required for ambiguous cases.
-- The WhatsApp workflow is a simulation; no real messages are sent.
-- LLM-based address parsing is intentionally not required for the first prototype. Add it only for ambiguous address interpretation, and retain a human-review fallback.
-- Business impact figures are assumption-based and should be validated in a controlled pilot.
+## Features
+
+- CSV loading, data cleaning, status normalization and duplicate order-ID removal.
+- Random Forest baseline model with a held-out test split.
+- Configurable risk thresholds and business assumptions in `config/rules.yaml`.
+- Four-way order decision policy:
+  1. `SHIP_AS_IS` – low-risk orders.
+  2. `WHATSAPP_CONFIRM` – orders requiring customer confirmation.
+  3. `PREPAID_NUDGE` – eligible orders offered a prepaid incentive.
+  4. `HOLD_REVIEW` – orders requiring manual review due to severe data-quality concerns.
+- WhatsApp message and response simulator (YES / NO / unclear / no response).
+- Dashboard with decision counts, estimated RTO economics and downloadable decision records.
+
+## Model and business assumptions
+
+The model uses historical order attributes to estimate RTO risk. Its output supports decision-making; it is not a standalone cancellation mechanism.
+
+The financial scenario uses the assignment assumptions:
+- COD RTO rate: 28%
+- Prepaid RTO rate: 4%
+- Expected cost per RTO: ₹169.40
+- Prepaid discount scenario: ₹20
+- Estimated net benefit per successful COD-to-prepaid conversion: ₹20.66
+
+These are estimates, not measured savings or guaranteed outcomes.
+
+## Limitations and safeguards
+
+- The dataset is historical and relatively small. Model metrics are diagnostic, not proof of causal impact.
+- Model scores must not trigger automatic cancellation. Ambiguous cases require human review.
+- The WhatsApp workflow is simulated; no real messages are sent.
+- The current prototype uses deterministic data-quality checks. It does not yet implement an LLM-powered Hinglish or nuanced address interpretation workflow.
+- Business impact figures are assumption-based and should be validated through a controlled pilot.
+- Monitor false positives, genuine-order cancellations and customer complaints before scaling.
 
 ## Project structure
-- `app.py`: Streamlit UI
-- `engine.py`: cleaning, model, risk scoring, decision rules and unit economics
-- `config/rules.yaml`: editable thresholds and assumptions
-- `data/orders_sample.csv`: supplied sample dataset
-- `reports/`: founder memo
-- `logs/`: decision and AI usage logs
+
+```text
+cod-risk-rto-engine/
+├── app.py
+├── engine.py
+├── config/
+│   └── rules.yaml
+├── data/
+│   └── orders_sample.csv
+├── reports/
+│   ├── founder_memo.md
+│   ├── founder_memo.pdf
+│   └── data_quality_summary.json
+├── logs/
+│   ├── decision_log.md
+│   └── ai_usage_log.md
+├── requirements.txt
+└── README.md
+```
+
+## Submission artifacts
+
+- `reports/founder_memo.pdf` – founder-facing business memo.
+- `reports/founder_memo.md` – editable memo source.
+- `logs/decision_log.md` – decision-policy documentation.
+- `logs/ai_usage_log.md` – AI assistance and validation record.
+
+## Future improvements
+
+- Optional LLM-based address interpretation for ambiguous and Hinglish addresses, with structured output and human-review fallback.
+- Integration with a real WhatsApp Business API.
+- Randomized pilot evaluation to measure actual incremental savings.
+- Model monitoring and threshold calibration as more delivery outcomes become available.
