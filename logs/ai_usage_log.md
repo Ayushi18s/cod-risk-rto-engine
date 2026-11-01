@@ -38,3 +38,11 @@
 ## Limitations
 
 The project uses a historical sample and a simulated WhatsApp workflow. It does not send real messages or establish causal savings from prepaid conversion. Model metrics and financial estimates should be validated through a controlled pilot.
+
+### Example 4: Local LLM-assisted address validation
+
+- **Tool:** Ollama with Qwen 2.5 (3B), integrated into the Streamlit dashboard.
+- **Input:** "Station chowk se left, Hanuman Mandir ke saamne", Chennai, Tamil Nadu, 600084.
+- **Initial result:** The LLM identified the address as ambiguous and recommended requesting a specific house number or street name.
+- **Final action:** The dashboard flagged the order for manual address confirmation before dispatch.
+- **Limitation:** The model returned generic missing-information text rather than extracting a verified house number or street name. Human confirmation remains necessary.

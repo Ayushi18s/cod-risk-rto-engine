@@ -93,3 +93,38 @@ cod-risk-rto-engine/
 - Integration with a real WhatsApp Business API.
 - Randomized pilot evaluation to measure actual incremental savings.
 - Model monitoring and threshold calibration as more delivery outcomes become available.
+
+## LLM-Assisted Address Validation
+
+The project integrates a locally hosted Qwen 2.5 (3B) model through Ollama
+to identify ambiguous or incomplete customer addresses.
+
+### How it works
+- Sends address, city, state, and PIN code to the local LLM.
+- Requests structured JSON containing ambiguity status, missing information,
+  normalized address, and recommendation.
+- Applies deterministic safeguards for vague landmarks, missing addresses,
+  short addresses, and invalid PIN codes.
+- Flags ambiguous orders for manual confirmation before dispatch.
+
+### Setup
+1. Install Ollama: https://ollama.com/
+2. Pull the model:
+
+   `ollama pull qwen2.5:3b`
+
+3. Start the Ollama service.
+4. Install project dependencies:
+
+   `pip install -r requirements.txt`
+
+5. Launch the dashboard:
+
+   `streamlit run app.py`
+
+### Limitations
+- Runs locally; no external LLM API key is required.
+- Model responses may be inaccurate or incomplete.
+- Deterministic checks act as safeguards but cannot guarantee address validity.
+- Ambiguous addresses require human review. The LLM does not automatically
+  cancel orders.

@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from engine import load_data, train_model, add_risk_scores, assign_action, load_rules, expected_rto_cost, prepaid_net_saving
-
+from address_llm import analyze_address
 st.set_page_config(page_title="COD Risk & RTO Control Tower", page_icon="📦", layout="wide")
 st.title("COD Risk & RTO Control Tower")
 st.caption("Pre-shipment decision support for a D2C Shopify brand")
@@ -86,6 +86,57 @@ cols = ["order_id","customer_name","city","order_value","customer_prior_orders",
 st.dataframe(view[cols].sort_values("risk_score", ascending=False), width="stretch", hide_index=True)
 st.download_button("Download scored decision log", view[cols].to_csv(index=False).encode("utf-8"),
                    "decision_log.csv", "text/csv")
+
+st.divider()
+st.subheader("LLM-assisted address validation")
+st.caption("Uses local Qwen 2.5 via Ollama, with deterministic safeguards.")
+
+address_order_ids = scored["order_id"].astype(str).tolist()
+
+address_selected_id = st.selectbox(
+    "Select an order to validate its address",
+    address_order_ids,
+    key="address_validation_order"
+)
+
+address_order = scored[
+    scored["order_id"].astype(str) == address_selected_id
+].iloc[0]
+
+address_value = (
+    "" if pd.isna(address_order["address"])
+    else str(address_order["address"])
+)
+
+pin_value = address_order["pincode"]
+if pd.isna(pin_value):
+    pin_code = ""
+elif float(pin_value).is_integer():
+    pin_code = str(int(pin_value))
+else:
+    pin_code = str(pin_value)
+
+st.write("**Address:**", address_value)
+st.write(
+    "**Location:**",
+    f"{address_order['city']}, {address_order['state']} - {pin_code}"
+)
+
+if st.button("Analyze address with local LLM"):
+    with st.spinner("Analyzing address using Qwen 2.5..."):
+        result = analyze_address(
+            address_value,
+            str(address_order["city"]),
+            str(address_order["state"]),
+            pin_code
+        )
+
+    st.json(result)
+
+    if result["review_required"]:
+        st.warning("Address requires manual confirmation before dispatch.")
+    else:
+        st.success("No address ambiguity detected.")
 
 st.divider()
 st.subheader("WhatsApp flow simulator")
